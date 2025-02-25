@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Task from "../model/Task.model.js";
 
 class TaskAggregationService {
@@ -50,18 +51,36 @@ class TaskAggregationService {
   async getRecentTasks() {
     return await Task.find().sort({ assignedDate: -1 }).limit(10);
   }
-  // async getTaskByUser(userId) {
-  //   return await Task.aggregate([
-  //     {
-  //       $match: {
-  //         users: { $in: [userId] },
-  //       },
-  //     },
-  //     {
-  //       $sort: { assignedDate: -1 },
-  //     },
-  //   ]);
-  // }
+  async getTaskByUser(userId) {
+    const id = new mongoose.Types.ObjectId(userId);
+    return await Task.aggregate([
+      {
+        $match: {
+          users: { "$in": [id] },
+        },
+      },
+      {
+        $lookup:{
+          from:"users",
+          localField:"assigner",
+          foreignField:"_id",
+          as:"assignerDetails"
+        }
+      },
+      {
+        $project:{
+          assigner:{$arrayElemAt:["$assignerDetails.name",0]},
+          
+          title:1,
+          // assigner:1,
+          assignedDate:1
+        }
+      },
+      {
+        $sort: { assignedDate: -1 },
+      }
+    ]);
+  }
   async getTopCompletedUser() {
     return await Task.aggregate([
       { $unwind: "$completedBy" },

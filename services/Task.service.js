@@ -61,7 +61,7 @@ class TaskService {
     return task;
   }
   async getTaskByUserId(userId) {
-    const tasks = await Task.find({ users: { $in: [userId] } })
+    const tasks = await Task.find({ users: { $in: ["67bc46f65f0ec29d585b4db9"] } })
       .select("title assigner assignedDate")
       .populate("assigner", "name -_id");
     // .populate("assigner");
@@ -85,19 +85,15 @@ class TaskService {
     if (!task) {
       throw new CustomError("Task not found", 404);
     }
+    if(task.completedBy.includes(userId)){
+      throw new CustomError("User already marked task as completed", 400);
+    }
     task.completedBy.push(userId);
     if (task.completedBy.length == task.users.length) {
       task.status = "Completed";
     }
     await task.save();
     return task;
-  }
-  async getUserwhichAssignedTask() {
-    const task = await Task.aggregate([
-      {
-        $match: {},
-      },
-    ]);
   }
   // Delete task by ID
   async deleteTaskById(id) {

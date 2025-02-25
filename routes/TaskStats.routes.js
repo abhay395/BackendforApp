@@ -13,7 +13,7 @@ const router = express.Router();
 router.get("/task-by-assigner", getTaskByAssigner);
 router.get("/completion-stats", getCompletionStats);
 router.get("/recent-tasks", getRecentTasks);
-// router.get("/task-by-user", dummyauthMiddlewareForUser,getTaskByUser);
+router.get("/task-by-user", dummyauthMiddlewareForUser,getTaskByUser);
 router.get("/top-completed-users", getTopCompletedUser);
 
 export default router;

@@ -31,7 +31,7 @@ const dummyauthMiddlewareForAdmin = async (req, res, next) => {
 
 const dummyauthMiddlewareForUser = async (req, res, next) => {
   req.user = {
-    _id: "67bc46f65f0ec29d585b4db9",
+    _id: "67bc46e65f0ec29d585b4db7",
     name: "Kuldeep bairwa",
     email: "kv74@gmail.com",
     role: "user",

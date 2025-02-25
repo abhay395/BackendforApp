@@ -19,18 +19,18 @@ const getRecentTasks = asyncHandler(async (req, res) => {
 });
 const getTopCompletedUser = asyncHandler(async (req, res) => {
   const stats = await TaskAggregationService.getTopCompletedUser();
-  console.log(stats)
-  // sendSuccessResponse(res, 200, "Top users by task completion", { stats });
+  // console.log(stats)
+  sendSuccessResponse(res, 200, "Top users by task completion", { stats });
 });
 const getTaskByUser = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  console.log(userId)
+  // console.log(userId)
   // const task = await Task.find({
   //   users:{$in:[userId]}
   // })
   const tasks = await TaskAggregationService.getTaskByUser(userId);
-  console.log(tasks)
-  // sendSuccessResponse(res, 200, "Tasks retrieved for user", { tasks });
+  // console.log(tasks)
+  sendSuccessResponse(res, 200, "Tasks retrieved for user", { tasks });
 });
 export {
   getTaskByAssigner,
