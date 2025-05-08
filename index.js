@@ -1,14 +1,9 @@
 import express from "express";
 import connectDB from "./db/connectDb.js";
 import userRouter from "./routes/User.routes.js";
-import taskRouter from "./routes/Task.routes.js";
-import notificationRouter from "./routes/Notification.routes.js";
-import taskStatsRoutes from "./routes/TaskStats.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import cluster from "cluster";
 import os from "os";
-import morgan from "morgan";
-import winston from "winston";
 import {logger} from "./utils/logger.js";
 
 
@@ -46,9 +41,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/task", taskRouter);
-app.use("/api/v1/stats", taskStatsRoutes);
-app.use("/", notificationRouter);
 
 app.use((err, req, res, next) => {
   logger.error(`Error: ${err.message} - ${req.method} ${req.url}`);
