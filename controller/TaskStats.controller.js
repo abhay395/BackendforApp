@@ -1,8 +1,6 @@
 import TaskAggregationService from "../services/TaskAggregation.service.js";
 import { sendSuccessResponse } from "../utils/response.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { User } from "../model/User.model.js";
-import Task from "../model/Task.model.js";
 
 const getTaskByAssigner = asyncHandler(async (req, res) => {
   const stats = await TaskAggregationService.getTaskByAssigner();

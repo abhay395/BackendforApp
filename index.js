@@ -1,30 +1,64 @@
-import express from 'express';
-import connectDB from './db/connectDb.js';
-import userRouter from './routes/User.routes.js';
-import {authMiddleware} from './middleware/authMiddleware.js';
-import taskRouter from './routes/Task.routes.js';
-import notificationRouter from './routes/Notification.routes.js';
-import { errorHandler } from './middleware/errorHandler.js';
-import taskStatsRoutes from './routes/TaskStats.routes.js'
+import express from "express";
+import connectDB from "./db/connectDb.js";
+import userRouter from "./routes/User.routes.js";
+import taskRouter from "./routes/Task.routes.js";
+import notificationRouter from "./routes/Notification.routes.js";
+import taskStatsRoutes from "./routes/TaskStats.routes.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import cluster from "cluster";
+import os from "os";
+import morgan from "morgan";
+import winston from "winston";
+import {logger} from "./utils/logger.js";
+
+
+
+if (cluster.isMaster) {
+  const numCPUs = os.cpus().length;
+  console.log(`Master ${process.pid} is running`);
+  console.log(`Number of CPUs: ${numCPUs}`);
+
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on("exit", (worker, code, signal) => {
+    console.log(
+      `Worker ${worker.process.pid} died with code ${code} and signal ${signal}`
+    );
+    cluster.fork();
+  });
+} else {
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 app.use(express.json());
-
-app.get('/',(req, res) => {
-    res.status(200).json({
-        // data:req.user,
-        success: true,
-        message: "Welcome to the Authentication API"
-    });
+// app.use(morgan("combined"));
+// Middleware to log request count per worker
+app.use((req, res, next) => {
+  logger.info(`Request: ${req.method} ${req.url}`);
+  next();
 });
-app.use('/api/v1/users', userRouter);
-app.use('/api/v1/task', taskRouter);
-app.use('/api/v1/stats',taskStatsRoutes);
-app.use('/', notificationRouter);
-app.use(errorHandler)
+
+app.get("/", (req, res) => {
+  res.send(
+    `Worker ${process.pid} - Total Requests: ${app.locals.requestCount}`
+  );
+});
+
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/task", taskRouter);
+app.use("/api/v1/stats", taskStatsRoutes);
+app.use("/", notificationRouter);
+
+app.use((err, req, res, next) => {
+  logger.error(`Error: ${err.message} - ${req.method} ${req.url}`);
+  res.status(500).json({ error: "Something went wrong!" });
+});
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Worker ${process.pid} is running on port ${PORT}`);
 });
 connectDB();
+}
